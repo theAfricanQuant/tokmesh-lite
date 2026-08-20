@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TokMesh Lite learning session 1: TDD, accepted-values validation, Rust code, commands, and test evidence.">
+  <title>TokMesh Lite — Session 01 Field Notes</title>
+  <style>
+    :root {
+      --paper: #f5f7fc;
+      --surface: #ffffff;
+      --ink: #12213b;
+      --muted: #60708b;
+      --line: #d8e0ef;
+      --cobalt: #3159d8;
+      --violet: #7447c7;
+      --red: #bd3345;
+      --red-soft: #fff0f2;
+      --green: #087a68;
+      --green-soft: #eaf8f4;
+      --amber: #9a6110;
+      --code: #111a2c;
+      --code-ink: #e9efff;
+      --shadow: 0 16px 50px rgba(31, 55, 97, 0.10);
+      --radius: 18px;
+      --content: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, transparent 39px, rgba(49, 89, 216, 0.07) 40px, transparent 41px),
+        linear-gradient(rgba(49, 89, 216, 0.035) 1px, transparent 1px),
+        var(--paper);
+      background-size: 100% 100%, 100% 32px, auto;
+      font-family: "Aptos", "Segoe UI", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+
+    a { color: var(--cobalt); text-underline-offset: 3px; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid rgba(49, 89, 216, 0.35);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    .page {
+      width: min(calc(100% - 32px), var(--content));
+      margin: 28px auto 80px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 560px;
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 48px;
+      align-items: end;
+      padding: clamp(32px, 7vw, 88px);
+      color: white;
+      background:
+        radial-gradient(circle at 82% 22%, rgba(185, 158, 255, 0.34), transparent 27%),
+        linear-gradient(138deg, #10233f 0%, #193466 57%, #4d2c86 100%);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.14;
+      background-image:
+        linear-gradient(30deg, transparent 48%, white 49%, white 50%, transparent 51%),
+        linear-gradient(150deg, transparent 48%, white 49%, white 50%, transparent 51%);
+      background-size: 54px 94px;
+      pointer-events: none;
+    }
+
+    .hero-copy, .hero-trace { position: relative; z-index: 1; }
+    .eyebrow {
+      margin: 0 0 18px;
+      font: 700 0.76rem/1.2 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .hero .eyebrow { color: #bcd0ff; }
+    h1, h2, h3 {
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.08;
+      text-wrap: balance;
+    }
+    h1 {
+      max-width: 800px;
+      margin: 0;
+      font-size: clamp(3.2rem, 8vw, 7.4rem);
+      font-weight: 400;
+      letter-spacing: -0.055em;
+    }
+    .hero-lede {
+      max-width: 700px;
+      margin: 28px 0 0;
+      color: #dce6ff;
+      font-size: clamp(1rem, 1.6vw, 1.22rem);
+    }
+    .session-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 34px;
+      color: #eef3ff;
+      font: 650 0.82rem/1.3 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+    .session-mark::before {
+      content: "";
+      width: 34px;
+      height: 2px;
+      background: #9ab6ff;
+    }
+
+    .hero-trace {
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .trace {
+      position: relative;
+      display: grid;
+      gap: 54px;
+      width: 220px;
+      padding-left: 60px;
+    }
+    .trace::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      top: 22px;
+      bottom: 22px;
+      width: 2px;
+      background: linear-gradient(var(--red) 0 45%, white 46% 54%, #55d7bd 55%);
+    }
+    .trace-step {
+      position: relative;
+      font: 750 0.82rem/1.25 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .trace-step::before {
+      content: "";
+      position: absolute;
+      left: -48px;
+      top: -5px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 5px solid rgba(255,255,255,0.18);
+      background: currentColor;
+      background-clip: padding-box;
+    }
+    .trace-step.red { color: #ff8998; }
+    .trace-step.learn { color: white; }
+    .trace-step.green { color: #66e8cf; }
+    .trace-step span {
+      display: block;
+      margin-top: 5px;
+      color: #cbd9f7;
+      font: 450 0.74rem/1.45 "Aptos", "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .snapshot {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      margin: -18px auto 54px;
+      position: relative;
+      z-index: 2;
+      width: calc(100% - 56px);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--line);
+      box-shadow: 0 8px 32px rgba(31, 55, 97, 0.08);
+    }
+    .metric { padding: 22px 20px; background: var(--surface); }
+    .metric strong {
+      display: block;
+      color: var(--cobalt);
+      font: 500 clamp(1.65rem, 3vw, 2.35rem)/1 Georgia, serif;
+    }
+    .metric span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font: 700 0.68rem/1.3 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      gap: 46px;
+      align-items: start;
+    }
+    .toc {
+      position: sticky;
+      top: 20px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(10px);
+    }
+    .toc p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font: 700 0.67rem/1.3 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .toc ol {
+      margin: 0;
+      padding-left: 1.15rem;
+      color: #94a1b7;
+    }
+    .toc li { padding: 5px 0 5px 6px; }
+    .toc a {
+      color: var(--ink);
+      font-size: 0.86rem;
+      text-decoration: none;
+    }
+    .toc a:hover { color: var(--cobalt); }
+
+    main { min-width: 0; }
+    section {
+      scroll-margin-top: 24px;
+      margin-bottom: 72px;
+    }
+    .section-head {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 26px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .section-no {
+      color: var(--violet);
+      font: 750 0.78rem/1.2 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.12em;
+    }
+    h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.35rem);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+    }
+    h3 {
+      margin: 32px 0 12px;
+      font-size: 1.45rem;
+      color: #223b69;
+    }
+    p { margin: 0 0 1em; }
+    .lede { color: #41516d; font-size: 1.08rem; }
+    .muted { color: var(--muted); }
+
+    .card {
+      margin: 20px 0;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 8px 25px rgba(31, 55, 97, 0.05);
+    }
+    .card h3:first-child { margin-top: 0; }
+    .callout {
+      padding: 20px 22px;
+      border-left: 5px solid var(--cobalt);
+      border-radius: 0 12px 12px 0;
+      background: #edf2ff;
+    }
+    .callout strong { color: #2447b7; }
+    .callout.red { border-color: var(--red); background: var(--red-soft); }
+    .callout.red strong { color: var(--red); }
+    .callout.green { border-color: var(--green); background: var(--green-soft); }
+    .callout.green strong { color: var(--green); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+    .flow li {
+      position: relative;
+      min-height: 126px;
+      padding: 18px 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: white;
+      counter-increment: step;
+    }
+    .flow li::before {
+      content: counter(step, decimal-leading-zero);
+      display: block;
+      margin-bottom: 18px;
+      color: var(--violet);
+      font: 750 0.72rem ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+    .flow li:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -11px;
+      top: 46%;
+      z-index: 2;
+      width: 20px;
+      text-align: center;
+      color: var(--cobalt);
+      background: var(--paper);
+      font-weight: 800;
+    }
+    .flow strong { display: block; font-size: 0.9rem; }
+    .flow span { color: var(--muted); font-size: 0.78rem; }
+
+    pre {
+      overflow: auto;
+      margin: 16px 0 22px;
+      padding: 22px;
+      border: 1px solid #243454;
+      border-radius: 14px;
+      color: var(--code-ink);
+      background: var(--code);
+      box-shadow: inset 0 1px rgba(255,255,255,0.05);
+      font: 0.82rem/1.62 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      white-space: pre;
+      tab-size: 4;
+    }
+    code {
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+    :not(pre) > code {
+      padding: 0.12em 0.38em;
+      border: 1px solid #d8e0ef;
+      border-radius: 5px;
+      color: #254399;
+      background: #edf2ff;
+      font-size: 0.88em;
+    }
+    .terminal::before, .source::before {
+      display: block;
+      margin-bottom: 14px;
+      color: #8fa4cc;
+      font: 700 0.66rem/1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .terminal::before { content: "Terminal"; }
+    .source::before { content: "Rust"; }
+    .prompt { color: #66e8cf; }
+    .error { color: #ff8998; }
+    .pass { color: #66e8cf; }
+    .dim { color: #91a0bd; }
+
+    .cycle {
+      margin: 30px 0 54px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: white;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .cycle-head {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      align-items: stretch;
+      border-bottom: 1px solid var(--line);
+    }
+    .cycle-badge {
+      display: grid;
+      place-items: center;
+      color: white;
+      background: linear-gradient(150deg, var(--cobalt), var(--violet));
+      font: 800 1.2rem/1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+    .cycle-title { padding: 24px; }
+    .cycle-title h3 { margin: 0 0 6px; }
+    .cycle-title p { margin: 0; color: var(--muted); }
+    .cycle-body { padding: 28px; }
+
+    details {
+      margin: 16px 0;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: white;
+    }
+    summary {
+      cursor: pointer;
+      padding: 16px 18px;
+      color: #223b69;
+      font-weight: 750;
+    }
+    details > div { padding: 0 18px 18px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.91rem;
+      background: white;
+    }
+    th, td {
+      padding: 14px 13px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: #2447b7;
+      background: #edf2ff;
+      font: 750 0.72rem/1.35 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .file-map {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .file {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: white;
+    }
+    .file code { display: block; margin-bottom: 8px; color: var(--cobalt); font-weight: 800; }
+    .file span { color: var(--muted); font-size: 0.88rem; }
+
+    .next {
+      padding: clamp(28px, 5vw, 52px);
+      color: white;
+      background: linear-gradient(135deg, #18345f, #3159d8);
+      border-radius: 24px;
+    }
+    .next h2 { color: white; }
+    .next ol { padding-left: 1.2rem; }
+    .next li { padding: 6px 0; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 54px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-trace { justify-content: flex-start; }
+      .trace { grid-template-columns: repeat(3, 1fr); width: 100%; padding: 50px 0 0; gap: 18px; }
+      .trace::before { left: 9%; right: 9%; top: 20px; bottom: auto; width: auto; height: 2px; }
+      .trace-step::before { left: 7%; top: -41px; }
+      .snapshot { grid-template-columns: repeat(2, 1fr); }
+      .layout { grid-template-columns: 1fr; }
+      .toc { position: static; }
+      .toc ol { columns: 2; }
+      .flow { grid-template-columns: 1fr; }
+      .flow li { min-height: auto; }
+      .flow li:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -18px; }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(calc(100% - 18px), var(--content)); margin-top: 9px; }
+      .hero { padding: 34px 23px; border-radius: 20px; }
+      h1 { font-size: clamp(2.8rem, 17vw, 4.6rem); }
+      .snapshot { width: calc(100% - 18px); grid-template-columns: 1fr; }
+      .toc ol { columns: 1; }
+      .section-head { grid-template-columns: 48px 1fr; }
+      .cycle-head { grid-template-columns: 62px 1fr; }
+      .cycle-body { padding: 18px; }
+      .file-map { grid-template-columns: 1fr; }
+      pre { margin-inline: -8px; padding: 17px; font-size: 0.74rem; }
+      footer { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    @media print {
+      @page { margin: 14mm; }
+      body { background: white; font-size: 10pt; }
+      .page { width: 100%; margin: 0; }
+      .hero { min-height: 0; padding: 30px; border-radius: 0; box-shadow: none; }
+      .hero-trace, .toc { display: none; }
+      .hero { grid-template-columns: 1fr; }
+      .snapshot { width: 100%; margin: 12px 0 28px; box-shadow: none; }
+      .layout { display: block; }
+      section, .card, .cycle, pre, table { break-inside: avoid; }
+      details > div { display: block; }
+      a { color: inherit; text-decoration: none; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">TokMesh Lite · Learning field notes</p>
+        <h1>From contract to proof.</h1>
+        <p class="hero-lede">
+          Session 01 turned a plain-language data-quality expectation into typed
+          Rust, executable validation, stable findings, and tests we can trust.
+        </p>
+        <p class="session-mark">20 August 2026 · Commit da81912</p>
+      </div>
+      <div class="hero-trace" aria-label="The test-driven development sequence">
+        <div class="trace">
+          <div class="trace-step red">RED<span>Describe missing behavior</span></div>
+          <div class="trace-step learn">LEARN<span>Read the failure</span></div>
+          <div class="trace-step green">GREEN<span>Make the promise true</span></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="snapshot" aria-label="Session summary">
+      <div class="metric"><strong>2</strong><span>TDD cycles</span></div>
+      <div class="metric"><strong>4</strong><span>Validation tests</span></div>
+      <div class="metric"><strong>2</strong><span>CLI tests</span></div>
+      <div class="metric"><strong>0</strong><span>Clippy warnings</span></div>
+      <div class="metric"><strong>1</strong><span>Feature commit</span></div>
+    </div>
+
+    <div class="layout">
+      <nav class="toc" aria-label="Session contents">
+        <p>In this notebook</p>
+        <ol>
+          <li><a href="#outcome">Outcome</a></li>
+          <li><a href="#baseline">Starting proof</a></li>
+          <li><a href="#tdd">What TDD means</a></li>
+          <li><a href="#cycle-one">Cycle one</a></li>
+          <li><a href="#cycle-two">Cycle two</a></li>
+          <li><a href="#code-map">Code map</a></li>
+          <li><a href="#verification">Verification</a></li>
+          <li><a href="#commands">Cargo glossary</a></li>
+          <li><a href="#git">Git checkpoint</a></li>
+          <li><a href="#next">Next session</a></li>
+        </ol>
+      </nav>
+
+      <main>
+        <section id="outcome">
+          <div class="section-head">
+            <span class="section-no">01 / 10</span>
+            <h2>What we achieved</h2>
+          </div>
+          <p class="lede">
+            TokMesh Lite can now express a categorical rule in YAML and enforce
+            it against CSV rows. It also rejects a contract that declares the
+            rule without listing any permitted values.
+          </p>
+
+          <div class="card">
+            <h3>The new contract vocabulary</h3>
+            <pre><code>quality:
+  - column: status
+    rule: accepted_values
+    values:
+      - operating
+      - suspended
+      - closed</code></pre>
+            <p>
+              In plain language: the <code>status</code> column may contain only
+              one of those three strings. A value such as <code>unknown</code>
+              creates a validation finding.
+            </p>
+          </div>
+
+          <div class="callout">
+            <strong>Why this matters for a data product.</strong>
+            The expectation is no longer trapped in prose or in someone’s
+            memory. It travels with the product contract and can be checked by a
+            person, a local command, or a future automated pipeline.
+          </div>
+        </section>
+
+        <section id="baseline">
+          <div class="section-head">
+            <span class="section-no">02 / 10</span>
+            <h2>Our starting proof</h2>
+          </div>
+          <p>
+            Before adding a new rule, we proved that the initial vertical slice
+            already handled valid products, valid data, and invalid contracts.
+          </p>
+
+          <h3>Valid product contract</h3>
+          <pre class="terminal"><code><span class="prompt">$</span> cargo run -- product validate examples/copper-mines/product.yaml
+Finished <span class="dim">`dev` profile [unoptimized + debuginfo]</span>
+Running <span class="dim">`target/debug/tokmesh-lite product validate ...`</span>
+<span class="pass">VALID — no validation issues found</span></code></pre>
+
+          <h3>Valid CSV against its contract</h3>
+          <pre class="terminal"><code><span class="prompt">$</span> cargo run -- data validate \
+    examples/copper-mines/product.yaml \
+    examples/copper-mines/data.csv
+Finished <span class="dim">`dev` profile [unoptimized + debuginfo]</span>
+Running <span class="dim">`target/debug/tokmesh-lite data validate ...`</span>
+<span class="pass">VALID — no validation issues found</span></code></pre>
+
+          <h3>Deliberately invalid contract</h3>
+          <pre class="terminal"><code><span class="prompt">$</span> cargo run -- product validate \
+    examples/invalid-products/duplicate-columns.yaml
+
+<span class="error">INVALID — 3 issue(s)</span>
+- [product.version.invalid] version: version must follow semantic versioning,
+  for example 1.0.0
+- [data.column.name.duplicate] data.schema[1].name:
+  column name 'mine_id' appears more than once
+- [quality.column.unknown] quality[0].column:
+  quality rule references unknown column 'missing_column'</code></pre>
+
+          <div class="callout red">
+            <strong>The terminal’s non-zero status was intentional.</strong>
+            Validation completed correctly and found contract violations. Exit
+            code <code>1</code> lets automation stop an invalid product.
+          </div>
+        </section>
+
+        <section id="tdd">
+          <div class="section-head">
+            <span class="section-no">03 / 10</span>
+            <h2>What TDD means</h2>
+          </div>
+          <p class="lede">
+            Test-Driven Development describes one missing behavior before
+            implementing it. The failure becomes evidence that the test can see
+            the missing capability; the smallest implementation then turns that
+            same test green.
+          </p>
+
+          <ol class="flow" aria-label="Test-driven development flow">
+            <li><strong>Need</strong><span>State the data-product expectation.</span></li>
+            <li><strong>Test</strong><span>Observe behavior through a public seam.</span></li>
+            <li><strong>RED</strong><span>Confirm failure for the expected reason.</span></li>
+            <li><strong>GREEN</strong><span>Add only enough Rust to satisfy it.</span></li>
+            <li><strong>Verify</strong><span>Run formatting, linting, and all tests.</span></li>
+          </ol>
+
+          <div class="card">
+            <h3>The public seams we tested</h3>
+            <table>
+              <thead>
+                <tr><th>Interface</th><th>What a caller gets</th><th>Why we test here</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>load_manifest(&amp;path)</code></td>
+                  <td>YAML becomes a typed <code>ProductManifest</code>, or a useful error.</td>
+                  <td>Tests use the same loading path as the CLI.</td>
+                </tr>
+                <tr>
+                  <td><code>validate_product(&amp;manifest)</code></td>
+                  <td>A report about whether the contract itself is sensible.</td>
+                  <td>An empty accepted-values list is a contract problem.</td>
+                </tr>
+                <tr>
+                  <td><code>validate_data(&amp;manifest, &amp;path)</code></td>
+                  <td>A report about whether CSV data obeys the contract.</td>
+                  <td>An unlisted row value is a dataset problem.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="muted">
+            We did not test private helpers. Tests should survive an internal
+            rewrite as long as the caller-visible promises remain true.
+          </p>
+        </section>
+
+        <section id="cycle-one">
+          <div class="section-head">
+            <span class="section-no">04 / 10</span>
+            <h2>Cycle one: reject an unlisted value</h2>
+          </div>
+
+          <div class="cycle">
+            <div class="cycle-head">
+              <div class="cycle-badge">01</div>
+              <div class="cycle-title">
+                <h3>Dataset behavior</h3>
+                <p><code>unknown</code> must fail when only three statuses are accepted.</p>
+              </div>
+            </div>
+            <div class="cycle-body">
+              <h3>The behavioral test</h3>
+              <pre class="source"><code>#[test]
+fn data_validation_rejects_value_outside_accepted_values() {
+    let directory =
+        tempfile::tempdir().expect("temporary directory should be created");
+    let manifest_path = directory.path().join("product.yaml");
+    let data_path = directory.path().join("data.csv");
+
+    std::fs::write(
+        &amp;manifest_path,
+        r"
+id: tokmesh.ng-lithium-sites
+name: Nigeria Lithium Sites
+version: 1.0.0
+owner:
+  country: Nigeria
+  organization: TokMesh Learning Laboratory
+data:
+  format: csv
+  schema:
+    - name: site_id
+      type: string
+      required: true
+    - name: status
+      type: string
+      required: true
+quality:
+  - column: status
+    rule: accepted_values
+    values:
+      - operating
+      - suspended
+      - closed
+sovereignty:
+  classification: national
+  allowed_countries:
+    - Nigeria
+",
+    )
+    .expect("manifest fixture should be written");
+
+    std::fs::write(
+        &amp;data_path,
+        "site_id,status\nNG-LI-000001,operating\nNG-LI-000002,unknown\n",
+    )
+    .expect("CSV fixture should be written");
+
+    let manifest = load_manifest(&amp;manifest_path).expect("manifest should parse");
+    let report =
+        validate_data(&amp;manifest, &amp;data_path).expect("CSV should be readable");
+
+    assert_eq!(report.issues.len(), 1);
+    assert_eq!(
+        report.issues[0].code,
+        "quality.accepted_values.rejected"
+    );
+    assert_eq!(report.issues[0].location, "row[3].status");
+}</code></pre>
+
+              <h3>RED: the vocabulary did not exist yet</h3>
+              <pre class="terminal"><code><span class="error">FAILED</span>
+manifest should parse: Manifest {
+  source: Error(
+    "quality[0].rule: unknown variant `accepted_values`,
+     expected `unique` or `range`"
+  )
+}</code></pre>
+              <p>
+                This was a useful RED: YAML parsing reached the exact new rule
+                and proved that TokMesh did not already support it.
+              </p>
+
+              <h3>GREEN part A: teach the manifest model</h3>
+              <pre class="source"><code>pub struct QualityRule {
+    pub column: String,
+    pub rule: RuleType,
+    #[serde(default)]
+    pub minimum: Option&lt;f64&gt;,
+    #[serde(default)]
+    pub maximum: Option&lt;f64&gt;,
+    #[serde(default)]
+    pub values: Vec&lt;String&gt;,
+}
+
+#[serde(rename_all = "lowercase")]
+pub enum RuleType {
+    Unique,
+    Range,
+    #[serde(rename = "accepted_values")]
+    AcceptedValues,
+}</code></pre>
+
+              <h3>GREEN part B: enforce the rule for each row</h3>
+              <pre class="source"><code>RuleType::AcceptedValues =&gt; {
+    if !rule.values.iter().any(|accepted| accepted == value) {
+        report.error(
+            "quality.accepted_values.rejected",
+            &amp;location,
+            format!(
+                "value '{value}' is not one of: {}",
+                rule.values.join(", ")
+            ),
+        );
+    }
+}</code></pre>
+
+              <div class="callout">
+                <strong>Read this Rust aloud.</strong>
+                Borrow each accepted value with <code>.iter()</code>; ask whether
+                <code>.any(...)</code> equals the CSV value; negate that answer
+                with <code>!</code>; report an issue when none match.
+              </div>
+
+              <h3>GREEN output</h3>
+              <pre class="terminal"><code><span class="prompt">$</span> cargo test --test validation \
+    data_validation_rejects_value_outside_accepted_values \
+    -- --exact
+
+running 1 test
+test data_validation_rejects_value_outside_accepted_values ... <span class="pass">ok</span>
+
+test result: <span class="pass">ok</span>. 1 passed; 0 failed; 0 ignored;
+2 filtered out; finished in 0.00s</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="cycle-two">
+          <div class="section-head">
+            <span class="section-no">05 / 10</span>
+            <h2>Cycle two: reject an empty declaration</h2>
+          </div>
+
+          <div class="cycle">
+            <div class="cycle-head">
+              <div class="cycle-badge">02</div>
+              <div class="cycle-title">
+                <h3>Contract behavior</h3>
+                <p><code>values: []</code> must fail before a CSV is read.</p>
+              </div>
+            </div>
+            <div class="cycle-body">
+              <h3>The behavioral test</h3>
+              <pre class="source"><code>#[test]
+fn product_validation_rejects_empty_accepted_values() {
+    let directory =
+        tempfile::tempdir().expect("temporary directory should be created");
+    let manifest_path = directory.path().join("product.yaml");
+
+    std::fs::write(
+        &amp;manifest_path,
+        r"
+id: tokmesh.ng-lithium-sites
+name: Nigeria Lithium Sites
+version: 1.0.0
+owner:
+  country: Nigeria
+  organization: TokMesh Learning Laboratory
+data:
+  format: csv
+  schema:
+    - name: site_id
+      type: string
+      required: true
+    - name: status
+      type: string
+      required: true
+quality:
+  - column: status
+    rule: accepted_values
+    values: []
+sovereignty:
+  classification: national
+  allowed_countries:
+    - Nigeria
+",
+    )
+    .expect("manifest fixture should be written");
+
+    let manifest = load_manifest(&amp;manifest_path).expect("manifest should parse");
+    let report = validate_product(&amp;manifest);
+
+    assert_eq!(report.issues.len(), 1);
+    assert_eq!(
+        report.issues[0].code,
+        "quality.accepted_values.empty"
+    );
+    assert_eq!(
+        report.issues[0].location,
+        "quality[0].values"
+    );
+}</code></pre>
+
+              <h3>RED output captured during the session</h3>
+              <pre class="terminal"><code><span class="prompt">$</span> cargo test --test validation \
+    product_validation_rejects_empty_accepted_values \
+    -- --exact
+
+running 1 test
+test product_validation_rejects_empty_accepted_values ... <span class="error">FAILED</span>
+
+assertion `left == right` failed
+  <span class="error">left: 0</span>
+ <span class="pass">right: 1</span>
+
+test result: <span class="error">FAILED</span>. 0 passed; 1 failed;
+3 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test validation`</code></pre>
+              <p>
+                The manifest parsed and product validation ran. The only mismatch
+                was behavioral: TokMesh found zero issues while our specification
+                required one.
+              </p>
+
+              <h3>The minimal implementation</h3>
+              <pre class="source"><code>if rule.rule == RuleType::AcceptedValues &amp;&amp; rule.values.is_empty() {
+    report.error(
+        "quality.accepted_values.empty",
+        format!("quality[{index}].values"),
+        "accepted-values rules require at least one value",
+    );
+}</code></pre>
+
+              <table>
+                <thead><tr><th>Expression</th><th>Meaning</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><code>rule.rule == RuleType::AcceptedValues</code></td>
+                    <td>The current quality rule is the new categorical rule.</td>
+                  </tr>
+                  <tr>
+                    <td><code>&amp;&amp;</code></td>
+                    <td>Both the left and right conditions must be true.</td>
+                  </tr>
+                  <tr>
+                    <td><code>rule.values.is_empty()</code></td>
+                    <td>The owned vector contains zero permitted values.</td>
+                  </tr>
+                  <tr>
+                    <td><code>format!("quality[{index}].values")</code></td>
+                    <td>Build a precise location such as <code>quality[0].values</code>.</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3>GREEN output captured during the session</h3>
+              <pre class="terminal"><code><span class="prompt">$</span> cargo test --test validation \
+    product_validation_rejects_empty_accepted_values \
+    -- --exact
+
+running 1 test
+test product_validation_rejects_empty_accepted_values ... <span class="pass">ok</span>
+
+test result: <span class="pass">ok</span>. 1 passed; 0 failed; 0 ignored;
+3 filtered out; finished in 0.00s</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="code-map">
+          <div class="section-head">
+            <span class="section-no">06 / 10</span>
+            <h2>Where the behavior lives</h2>
+          </div>
+          <p>
+            One YAML rule crossed four files while preserving the two small
+            validation interfaces used by callers.
+          </p>
+
+          <div class="file-map">
+            <div class="file">
+              <code>src/product/manifest.rs</code>
+              <span>Defines the typed vocabulary: <code>values</code> and <code>AcceptedValues</code>.</span>
+            </div>
+            <div class="file">
+              <code>src/product/validate.rs</code>
+              <span>Checks whether the declaration itself makes sense.</span>
+            </div>
+            <div class="file">
+              <code>src/data/quality.rs</code>
+              <span>Checks whether each non-empty, correctly typed CSV value obeys the declaration.</span>
+            </div>
+            <div class="file">
+              <code>tests/validation.rs</code>
+              <span>Specifies both promises through public interfaces.</span>
+            </div>
+          </div>
+
+          <pre><code>product.yaml
+    │
+    ▼
+load_manifest() ───────► ProductManifest
+                              │
+                    ┌─────────┴─────────┐
+                    ▼                   ▼
+          validate_product()     validate_data()
+          Is the contract        Does the CSV obey
+          internally valid?      the contract?
+                    │                   │
+                    └─────────┬─────────┘
+                              ▼
+                     ValidationReport
+                   code · location · message</code></pre>
+        </section>
+
+        <section id="verification">
+          <div class="section-head">
+            <span class="section-no">07 / 10</span>
+            <h2>Repository-wide verification</h2>
+          </div>
+
+          <h3>Strict Clippy run</h3>
+          <pre class="terminal"><code><span class="prompt">$</span> cargo clippy --all-targets --all-features -- -D warnings
+
+Checking tokmesh-lite v0.1.0
+Finished <span class="dim">`dev` profile [unoptimized + debuginfo]</span>
+
+<span class="pass">Result: passed with zero warnings.</span></code></pre>
+
+          <h3>Complete test suite</h3>
+          <pre class="terminal"><code><span class="prompt">$</span> cargo test
+
+tests/cli.rs
+  invalid_product_command_uses_validation_exit_code ... <span class="pass">ok</span>
+  valid_product_command_exits_successfully ........... <span class="pass">ok</span>
+
+tests/validation.rs
+  invalid_example_reports_stable_issue_codes ........ <span class="pass">ok</span>
+  valid_example_manifest_and_data_pass .............. <span class="pass">ok</span>
+  product_validation_rejects_empty_accepted_values .. <span class="pass">ok</span>
+  data_validation_rejects_value_outside_accepted_values
+                                                     ... <span class="pass">ok</span>
+
+Doc-tests tokmesh_lite
+  0 tests; <span class="pass">ok</span>
+
+<span class="pass">Overall: 6 executable tests passed; 0 failed.</span></code></pre>
+
+          <details open>
+            <summary>Why did the complete suite print “INVALID — 3 issue(s)”?</summary>
+            <div>
+              <p>
+                One CLI test deliberately runs an invalid manifest and confirms
+                that the command returns exit code <code>1</code>. Seeing the
+                invalid report inside a passing test run is expected: the test
+                passed because the command failed validation exactly as designed.
+              </p>
+            </div>
+          </details>
+
+          <div class="callout green">
+            <strong>Completion evidence.</strong>
+            The feature passed its focused tests, all earlier behavior remained
+            green, formatting completed, and strict Clippy reported no warnings.
+          </div>
+        </section>
+
+        <section id="commands">
+          <div class="section-head">
+            <span class="section-no">08 / 10</span>
+            <h2>Cargo command glossary</h2>
+          </div>
+          <p class="lede">
+            Cargo is Rust’s project tool. It downloads declared dependencies,
+            compiles code, runs programs, executes tests, and coordinates other
+            development checks.
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Command</th><th>What it does</th><th>How to read success</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>cargo run -- …</code></td>
+                <td>Compiles the development build when needed, then runs TokMesh Lite. Everything after <code>--</code> is passed to TokMesh rather than interpreted by Cargo.</td>
+                <td>The program prints its report and returns exit code 0, 1, or 2.</td>
+              </tr>
+              <tr>
+                <td><code>cargo fmt</code></td>
+                <td>Rewrites Rust files into the standard style chosen by <code>rustfmt</code>. This removes debates about spacing and line wrapping.</td>
+                <td>Usually prints nothing. Files may be changed mechanically.</td>
+              </tr>
+              <tr>
+                <td><code>cargo fmt --check</code></td>
+                <td>Checks formatting without rewriting files. Useful before a commit and in CI.</td>
+                <td>No output and exit code 0 means everything is formatted.</td>
+              </tr>
+              <tr>
+                <td><code>cargo test</code></td>
+                <td>Builds test targets and runs the complete suite: library, binary, integration, CLI, and documentation test harnesses.</td>
+                <td>Every section ends with <code>test result: ok</code>.</td>
+              </tr>
+              <tr>
+                <td><code>cargo test --test validation NAME -- --exact</code></td>
+                <td>Runs one named test from <code>tests/validation.rs</code>. The second <code>--</code> sends <code>--exact</code> to Rust’s test runner.</td>
+                <td>One test runs; the others are reported as filtered out.</td>
+              </tr>
+              <tr>
+                <td><code>cargo clippy</code></td>
+                <td>Runs Rust-aware static analysis. Clippy finds suspicious, needlessly complex, or unidiomatic code beyond what compilation alone reports.</td>
+                <td>It finishes without warnings or errors.</td>
+              </tr>
+              <tr>
+                <td><code>--all-targets</code></td>
+                <td>Checks the library, executable, tests, examples, and benchmarks that exist in the package.</td>
+                <td>No target is silently omitted from linting.</td>
+              </tr>
+              <tr>
+                <td><code>--all-features</code></td>
+                <td>Enables every declared Cargo feature while checking. TokMesh Lite currently has no optional feature set, but the gate remains future-safe.</td>
+                <td>All feature combinations represented by “all enabled” compile cleanly.</td>
+              </tr>
+              <tr>
+                <td><code>-- -D warnings</code></td>
+                <td>Passes <code>-D warnings</code> to Clippy. “Deny warnings” makes any warning fail the command, preventing warning debt.</td>
+                <td>Exit code 0 means there were no warnings.</td>
+              </tr>
+              <tr>
+                <td><code>cargo build --release</code></td>
+                <td>Creates an optimized binary under <code>target/release/</code>. We will use this for million-row performance measurements.</td>
+                <td>The release profile finishes successfully.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Common output phrases</h3>
+          <table>
+            <thead><tr><th>Phrase</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>Compiling</code></td><td>Cargo is translating changed Rust source or dependencies into machine code.</td></tr>
+              <tr><td><code>Finished dev profile</code></td><td>The unoptimized, debugging-friendly build is ready.</td></tr>
+              <tr><td><code>Finished in 0.00s</code></td><td>The measured test execution was extremely quick; compilation time is reported separately.</td></tr>
+              <tr><td><code>filtered out</code></td><td>Tests existed but were intentionally skipped because a name filter selected one test.</td></tr>
+              <tr><td><code>exit code 0</code></td><td>Execution succeeded and validation passed.</td></tr>
+              <tr><td><code>exit code 1</code></td><td>Execution succeeded but the product or dataset was invalid.</td></tr>
+              <tr><td><code>exit code 2</code></td><td>TokMesh could not complete because input could not be read, parsed, or serialized.</td></tr>
+              <tr><td><code>exit code 101</code></td><td>The Rust test process had at least one failing test; expected during a deliberate RED step.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="git">
+          <div class="section-head">
+            <span class="section-no">09 / 10</span>
+            <h2>Git checkpoint</h2>
+          </div>
+          <p>
+            The completed feature became one focused commit and was pushed to
+            the tracked <code>main</code> branch.
+          </p>
+          <pre class="terminal"><code><span class="prompt">$</span> git status
+<span class="prompt">$</span> git diff
+<span class="prompt">$</span> git add src/product/manifest.rs
+<span class="prompt">$</span> git add src/product/validate.rs
+<span class="prompt">$</span> git add src/data/quality.rs
+<span class="prompt">$</span> git add tests/validation.rs
+<span class="prompt">$</span> git diff --cached
+<span class="prompt">$</span> git commit -m "feat: add accepted-values quality validation"
+<span class="prompt">$</span> git push</code></pre>
+
+          <div class="card">
+            <h3>Recorded result</h3>
+            <p><code>da81912 feat: add accepted-values quality validation</code></p>
+            <p class="muted">
+              At documentation closeout, local <code>main</code> and
+              <code>origin/main</code> both pointed to this commit.
+            </p>
+          </div>
+
+          <table>
+            <thead><tr><th>Git command</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><code>git status</code></td><td>Shows the branch and which files are modified, staged, or untracked.</td></tr>
+              <tr><td><code>git diff</code></td><td>Shows unstaged line-by-line changes.</td></tr>
+              <tr><td><code>git add FILE</code></td><td>Places one chosen file into the next commit.</td></tr>
+              <tr><td><code>git diff --cached</code></td><td>Shows exactly what the next commit will contain.</td></tr>
+              <tr><td><code>git commit -m "…"</code></td><td>Records the staged snapshot locally with a descriptive message.</td></tr>
+              <tr><td><code>git push</code></td><td>Sends local commits to the configured GitHub remote.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="next" class="next">
+          <p class="eyebrow">Resume here</p>
+          <h2>Next session: a runnable Nigeria lithium product</h2>
+          <ol>
+            <li>Review and commit this session’s documentation.</li>
+            <li>Create a small, clearly labelled synthetic product manifest.</li>
+            <li>Create one valid and one deliberately invalid CSV.</li>
+            <li>Validate both through the CLI and record their outputs.</li>
+            <li>Only then design the deterministic large-dataset generator.</li>
+          </ol>
+          <p>
+            The scale lesson will generate 10K, 100K, 1M, and later 5M rows
+            locally. Generated CSV files will stay out of Git. We will measure
+            release-build duration, rows per second, file size, findings, and
+            peak memory rather than guessing about performance.
+          </p>
+        </section>
+
+        <footer>
+          <span>TokMesh Lite · Session 01 · 20 August 2026</span>
+          <span>Self-contained HTML · Offline readable · Print friendly</span>
+        </footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

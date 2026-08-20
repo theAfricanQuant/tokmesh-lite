@@ -44,7 +44,9 @@ The first two validations pass. The deliberately invalid manifest fails and expl
 
 ## Concepts
 
-- [Rust learning guide](docs/learning.md)
+- [Rust and data-mesh learning roadmap](docs/learning.md)
+- [Learning progress](docs/progress.md)
+- [Session 1 HTML workbook](docs/sessions/2026-08-20-session-01.html)
 - [Data-mesh concepts](docs/data-mesh.md)
 - [Architecture decisions](docs/decisions/)
 
@@ -60,4 +62,3 @@ cargo doc --no-deps
 ## License
 
 MIT
-
