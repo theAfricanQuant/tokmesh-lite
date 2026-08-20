@@ -32,3 +32,100 @@ fn invalid_example_reports_stable_issue_codes() {
     assert!(codes.contains(&"data.column.name.duplicate"));
     assert!(codes.contains(&"quality.column.unknown"));
 }
+
+#[test]
+fn data_validation_rejects_value_outside_accepted_values() {
+    let directory = tempfile::tempdir().expect("temporary directory should be created");
+    let manifest_path = directory.path().join("product.yaml");
+    let data_path = directory.path().join("data.csv");
+
+    std::fs::write(
+        &manifest_path,
+        r"
+id: tokmesh.ng-lithium-sites
+name: Nigeria Lithium Sites
+version: 1.0.0
+owner:
+  country: Nigeria
+  organization: TokMesh Learning Laboratory
+data:
+  format: csv
+  schema:
+    - name: site_id
+      type: string
+      required: true
+    - name: status
+      type: string
+      required: true
+quality:
+  - column: status
+    rule: accepted_values
+    values:
+      - operating
+      - suspended
+      - closed
+sovereignty:
+  classification: national
+  allowed_countries:
+    - Nigeria
+",
+    )
+    .expect("manifest fixture should be written");
+    std::fs::write(
+        &data_path,
+        "site_id,status\nNG-LI-000001,operating\nNG-LI-000002,unknown\n",
+    )
+    .expect("CSV fixture should be written");
+
+    let manifest = load_manifest(&manifest_path).expect("manifest should parse");
+    let report = validate_data(&manifest, &data_path).expect("CSV should be readable");
+
+    assert_eq!(report.issues.len(), 1);
+    assert_eq!(report.issues[0].code, "quality.accepted_values.rejected");
+    assert_eq!(report.issues[0].location, "row[3].status");
+}
+
+#[test]
+fn product_validation_rejects_empty_accepted_values() {
+    let directory = tempfile::tempdir().expect("temporary directory should be created");
+
+    let manifest_path = directory.path().join("product.yaml");
+
+    std::fs::write(
+        &manifest_path,
+        r"
+  id: tokmesh.ng-lithium-sites
+  name: Nigeria Lithium Sites
+  version: 1.0.0
+  owner:
+    country: Nigeria
+    organization: TokMesh Learning Laboratory
+  data:
+    format: csv
+    schema:
+      - name: site_id
+        type: string
+        required: true
+      - name: status
+        type: string
+        required: true
+  quality:
+    - column: status
+      rule: accepted_values
+      values: []
+  sovereignty:
+    classification: national
+    allowed_countries:
+      - Nigeria
+  ",
+    )
+    .expect("manifest fixture should be written");
+
+    let manifest = load_manifest(&manifest_path).expect("manifest should parse");
+
+    let report = validate_product(&manifest);
+
+    assert_eq!(report.issues.len(), 1);
+    assert_eq!(report.issues[0].code, "quality.accepted_values.empty");
+    assert_eq!(report.issues[0].location, "quality[0].values");
+}

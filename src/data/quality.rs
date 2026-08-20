@@ -55,6 +55,15 @@ pub(crate) fn validate_row(
                 RuleType::Range => {
                     validate_range(value, rule.minimum, rule.maximum, &location, report);
                 }
+                RuleType::AcceptedValues => {
+                    if !rule.values.iter().any(|accepted| accepted == value) {
+                        report.error(
+                            "quality.accepted_values.rejected",
+                            &location,
+                            format!("value '{value}' is not one of: {}", rule.values.join(", ")),
+                        );
+                    }
+                }
             }
         }
     }

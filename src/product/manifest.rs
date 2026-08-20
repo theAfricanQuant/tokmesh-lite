@@ -61,6 +61,8 @@ pub struct QualityRule {
     pub minimum: Option<f64>,
     #[serde(default)]
     pub maximum: Option<f64>,
+    #[serde(default)]
+    pub values: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -68,6 +70,8 @@ pub struct QualityRule {
 pub enum RuleType {
     Unique,
     Range,
+    #[serde(rename = "accepted_values")]
+    AcceptedValues,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

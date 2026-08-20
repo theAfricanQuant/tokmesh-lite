@@ -103,6 +103,14 @@ pub fn validate_product(manifest: &ProductManifest) -> ValidationReport {
                 _ => {}
             }
         }
+
+        if rule.rule == RuleType::AcceptedValues && rule.values.is_empty() {
+            report.error(
+                "quality.accepted_values.empty",
+                format!("quality[{index}].values"),
+                "accepted-values rules require at least one value",
+            );
+        }
     }
 
     report
