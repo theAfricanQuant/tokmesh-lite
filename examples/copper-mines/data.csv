@@ -1,0 +1,5 @@
+mine_id,mine_name,latitude,longitude,active
+RW-001,Nyakabingo Example,-1.8000,29.6333,true
+RW-002,Rutongo Example,-1.7833,29.8333,true
+RW-003,Inactive Training Site,-2.0500,29.3500,false
+

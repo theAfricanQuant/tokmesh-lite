@@ -1,0 +1,44 @@
+id: icglr.copper-mines
+name: Copper Mine Sites
+version: 1.0.0
+description: Synthetic mine-site data used to demonstrate TokMesh Lite.
+owner:
+  country: Rwanda
+  organization: Example Mining Authority
+data:
+  format: csv
+  schema:
+    - name: mine_id
+      type: string
+      required: true
+    - name: mine_name
+      type: string
+      required: true
+    - name: latitude
+      type: decimal
+      required: true
+    - name: longitude
+      type: decimal
+      required: true
+    - name: active
+      type: boolean
+      required: true
+quality:
+  - column: mine_id
+    rule: unique
+  - column: latitude
+    rule: range
+    minimum: -90
+    maximum: 90
+  - column: longitude
+    rule: range
+    minimum: -180
+    maximum: 180
+sovereignty:
+  classification: regional
+  allowed_countries:
+    - Rwanda
+    - Burundi
+    - Uganda
+license: CC-BY-4.0
+

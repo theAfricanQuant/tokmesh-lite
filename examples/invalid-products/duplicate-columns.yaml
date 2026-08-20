@@ -1,0 +1,22 @@
+id: invalid.duplicate-columns
+name: Duplicate Columns Example
+version: not-semver
+owner:
+  country: Exampleland
+  organization: Example Organization
+data:
+  format: csv
+  schema:
+    - name: mine_id
+      type: string
+      required: true
+    - name: mine_id
+      type: integer
+      required: false
+quality:
+  - column: missing_column
+    rule: unique
+sovereignty:
+  classification: internal
+  allowed_countries: []
+
