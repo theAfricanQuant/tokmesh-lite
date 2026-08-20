@@ -61,7 +61,11 @@ concepts, commit state, unresolved questions, and exact next step. Update
 user-visible behavior changes. Create a self-contained HTML workbook under
 `docs/sessions/` containing the lesson, code, commands, captured outputs,
 command explanations, and resumption point; link it from the progress entry.
+Add the workbook to `docs/index.html` newest-first and update the landing page's
+session count and active learning milestone.
 
 The session is closed when the progress entry matches the repository state and
 a fresh clone has enough context to resume safely. The HTML workbook must open
-offline and print cleanly without external assets.
+offline and print cleanly without external assets. Render the workbook and
+landing page at desktop and mobile widths before publishing, then verify their
+GitHub Pages URLs after pushing.

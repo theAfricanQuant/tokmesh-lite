@@ -68,7 +68,10 @@ Testing:
 - Strict Clippy completed with zero warnings.
 - The complete suite passed: two CLI tests and four validation tests.
 - Feature commit: `da81912 feat: add accepted-values quality validation`.
-- `main` and `origin/main` pointed to `da81912` at session closeout.
+- Session documentation commit:
+  `54f8e2e docs: add guided learning roadmap and session workbook`.
+- GitHub Pages learning library:
+  <https://theafricanquant.github.io/tokmesh-lite/>.
 
 ### Workflow adjustment
 
@@ -79,7 +82,6 @@ update.
 
 ### Next session
 
-Review and commit the session documentation and HTML workbook, then create the
-small synthetic Nigeria lithium product manifest plus valid and invalid CSV
-examples. After the small example is trustworthy, begin the deterministic
-large-dataset generator.
+Create the small synthetic Nigeria lithium product manifest plus valid and
+invalid CSV examples. After the small example is trustworthy, begin the
+deterministic large-dataset generator.
