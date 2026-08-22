@@ -1,0 +1,129 @@
+id: tokmesh.ng-lithium-sites
+name: Nigeria Lithium Learning Sites
+version: 1.0.0
+description: >-
+  Synthetic Nigeria-focused lithium site records created for learning and
+  validator testing. This is not a register of real mines, deposits, operators,
+  reserves, grades, or production activity.
+
+owner:
+  country: Nigeria
+  organization: TokMesh Learning Laboratory
+
+data:
+  format: csv
+  schema:
+    - name: site_id
+      type: string
+      required: true
+
+    - name: site_name
+      type: string
+      required: true
+
+    - name: jurisdiction
+      type: string
+      required: true
+
+    - name: district_code
+      type: string
+      required: true
+
+    - name: zone
+      type: string
+      required: true
+
+    - name: deposit_type
+      type: string
+      required: true
+
+    - name: primary_mineral
+      type: string
+      required: true
+
+    - name: li2o_grade_percent
+      type: decimal
+      required: true
+
+    - name: activity
+      type: string
+      required: true
+
+    - name: latitude
+      type: decimal
+      required: true
+
+    - name: longitude
+      type: decimal
+      required: true
+
+    - name: sample_date
+      type: date
+      required: true
+
+quality:
+  - column: site_id
+    rule: unique
+
+  - column: jurisdiction
+    rule: accepted_values
+    values:
+      - Nasarawa
+      - Kaduna
+      - Kwara
+      - Oyo
+      - Kogi
+      - Ekiti
+      - FCT
+      - Niger
+
+  - column: zone
+    rule: accepted_values
+    values:
+      - central
+      - southwestern
+      - west-central
+      - fct-niger
+
+  - column: deposit_type
+    rule: accepted_values
+    values:
+      - hard-rock-pegmatite
+
+  - column: primary_mineral
+    rule: accepted_values
+    values:
+      - spodumene
+      - lepidolite
+      - mixed
+
+  - column: li2o_grade_percent
+    rule: range
+    minimum: 0
+    maximum: 10
+
+  - column: activity
+    rule: accepted_values
+    values:
+      - exploration
+      - extraction
+      - processing
+      - suspended
+
+  - column: latitude
+    rule: range
+    minimum: -90
+    maximum: 90
+
+  - column: longitude
+    rule: range
+    minimum: -180
+    maximum: 180
+
+sovereignty:
+  classification: national
+  allowed_countries:
+    - Nigeria
+
+license: CC0-1.0
+

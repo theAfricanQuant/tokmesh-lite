@@ -129,3 +129,48 @@ fn product_validation_rejects_empty_accepted_values() {
     assert_eq!(report.issues[0].code, "quality.accepted_values.empty");
     assert_eq!(report.issues[0].location, "quality[0].values");
 }
+
+#[test]
+fn nigeria_lithium_invalid_example_rejects_unknown_jurisdiction() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let manifest_path = root.join("examples/nigeria-lithium/product.yaml");
+    let data_path = root.join("examples/nigeria-lithium/invalid.csv");
+
+    let manifest = load_manifest(&manifest_path).expect("manifest should parse");
+
+    let report = validate_data(&manifest, &data_path).expect("CSV should be readable");
+
+    assert!(report.issues.iter().any(|issue| {
+        issue.code == "quality.accepted_values.rejected" && issue.location == "row[4].jurisdiction"
+    }));
+}
+
+#[test]
+fn nigeria_lithium_invalid_example_rejects_grade_outside_range() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let manifest_path = root.join("examples/nigeria-lithium/product.yaml");
+    let data_path = root.join("examples/nigeria-lithium/invalid.csv");
+
+    let manifest = load_manifest(&manifest_path).expect("manifest should parse");
+
+    let report = validate_data(&manifest, &data_path).expect("CSV should be readable");
+
+    assert!(report.issues.iter().any(|issue| {
+        issue.code == "quality.range.outside" && issue.location == "row[5].li2o_grade_percent"
+    }));
+}
+
+#[test]
+fn nigeria_lithium_invalid_example_rejects_missing_site_name() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let manifest_path = root.join("examples/nigeria-lithium/product.yaml");
+    let data_path = root.join("examples/nigeria-lithium/invalid.csv");
+
+    let manifest = load_manifest(&manifest_path).expect("manifest should parse");
+
+    let report = validate_data(&manifest, &data_path).expect("CSV should be readable");
+
+    assert!(report.issues.iter().any(|issue| {
+        issue.code == "data.value.required" && issue.location == "row[6].site_name"
+    }));
+}

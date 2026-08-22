@@ -1,0 +1,9 @@
+site_id,site_name,jurisdiction,district_code,zone,deposit_type,primary_mineral,li2o_grade_percent,activity,latitude,longitude,sample_date
+NG-LI-000001,Synthetic Site 001,Nasarawa,NG-NAS-L01,central,hard-rock-pegmatite,spodumene,4.72,exploration,8.52,8.21,2026-01-15
+NG-LI-000001,Synthetic Site 002,Kaduna,NG-KAD-L01,central,hard-rock-pegmatite,spodumene,3.91,exploration,10.21,7.44,2026-01-16
+NG-LI-000003,Synthetic Site 003,Unknown,NG-KWA-L01,southwestern,hard-rock-pegmatite,mixed,5.13,extraction,8.81,4.62,2026-01-17
+NG-LI-000004,Synthetic Site 004,Oyo,NG-OYO-L01,southwestern,hard-rock-pegmatite,spodumene,12.50,exploration,8.12,3.91,2026-01-18
+NG-LI-000005,,Kogi,NG-KOG-L01,west-central,hard-rock-pegmatite,lepidolite,3.48,extraction,7.83,6.72,2026-01-19
+NG-LI-000006,Synthetic Site 006,Ekiti,NG-EKI-L01,west-central,hard-rock-pegmatite,lepidolite,2.95,suspended,7.71,5.24,2026-01-20
+NG-LI-000007,Synthetic Site 007,FCT,NG-FCT-L01,fct-niger,hard-rock-pegmatite,mixed,4.08,processing,9.02,7.51,2026-01-21
+NG-LI-000008,Synthetic Site 008,Niger,NG-NIG-L01,fct-niger,hard-rock-pegmatite,spodumene,5.61,extraction,9.91,5.93,2026-01-22
