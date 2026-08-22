@@ -54,6 +54,7 @@ The first two validations pass. The deliberately invalid manifest fails and expl
 ## Concepts
 
 - [Rendered HTML learning library](https://theafricanquant.github.io/tokmesh-lite/)
+- [Session 2 rendered HTML workbook](https://theafricanquant.github.io/tokmesh-lite/sessions/2026-08-22-session-02.html)
 - [Session 1 rendered HTML workbook](https://theafricanquant.github.io/tokmesh-lite/sessions/2026-08-20-session-01.html)
 - [Rust and data-mesh learning roadmap](docs/learning.md)
 - [Learning progress](docs/progress.md)

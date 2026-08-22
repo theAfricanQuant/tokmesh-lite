@@ -44,11 +44,11 @@ tests.
 Rust concepts: exhaustive matching, vectors, iterator predicates, dependency
 selection, counters, and state accumulated across rows.
 
-### 3. Publish the Nigeria lithium learning product — next
+### 3. Publish the Nigeria lithium learning product — in progress
 
-- Add a clearly labelled synthetic product manifest.
-- Add small valid and invalid CSV examples.
-- Model jurisdictions, minerals, activity, grade, coordinates, and dates.
+- [x] Add a clearly labelled synthetic product manifest.
+- [x] Add small valid and invalid CSV examples.
+- [x] Model jurisdictions, minerals, activity, grade, coordinates, and dates.
 - Document the contract without presenting synthetic records as real mines.
 
 Data-mesh concepts: product ownership, schema, executable quality expectations,

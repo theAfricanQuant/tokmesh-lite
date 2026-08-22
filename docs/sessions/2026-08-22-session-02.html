@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TokMesh Lite Session 2 workbook: Nigeria lithium fixtures, TDD evidence, Rust and shell commands, Git checkpoints, and GitHub Pages.">
+  <title>TokMesh Lite — Session 02 Field Workbook</title>
+  <style>
+    :root {
+      --paper:#f3f6fb; --surface:#fff; --ink:#132238; --muted:#5e6f87;
+      --line:#d6dfec; --navy:#102540; --blue:#315bd8; --violet:#7147bd;
+      --red:#b9344d; --red-soft:#fff0f3; --green:#087966; --green-soft:#e8f7f2;
+      --amber:#945c08; --amber-soft:#fff7e7; --code:#111b2d; --code-ink:#edf3ff;
+      --shadow:0 16px 48px rgba(25,49,87,.11); --radius:18px; --max:1180px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;color:var(--ink);line-height:1.65;
+      font-family:"Aptos","Segoe UI",system-ui,sans-serif;
+      background:
+        linear-gradient(90deg,transparent 39px,rgba(49,91,216,.07) 40px,transparent 41px),
+        linear-gradient(rgba(49,91,216,.035) 1px,transparent 1px),var(--paper);
+      background-size:100% 100%,100% 32px,auto;
+    }
+    a{color:var(--blue);text-underline-offset:3px}
+    a:focus-visible,summary:focus-visible{outline:3px solid rgba(49,91,216,.35);outline-offset:4px}
+    h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.08;text-wrap:balance}
+    code,kbd,.mono{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}
+    code{font-size:.9em}
+    .page{width:min(calc(100% - 32px),var(--max));margin:28px auto 80px}
+    .hero{
+      position:relative;overflow:hidden;display:grid;grid-template-columns:1.25fr .75fr;
+      min-height:570px;padding:clamp(34px,7vw,84px);gap:42px;align-items:end;color:#fff;
+      background:radial-gradient(circle at 82% 22%,rgba(116,195,255,.28),transparent 27%),
+        linear-gradient(138deg,#102540 0%,#173867 56%,#50317f 100%);
+      border-radius:30px;box-shadow:var(--shadow)
+    }
+    .hero:before{content:"";position:absolute;inset:0;opacity:.14;background:
+      repeating-linear-gradient(120deg,transparent 0 34px,rgba(255,255,255,.3) 35px 36px)}
+    .hero-copy,.specimen{position:relative;z-index:1}
+    .eyebrow{margin:0 0 16px;color:#bdd4ff;font:750 .75rem/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(3.2rem,7.5vw,7rem);font-weight:400;letter-spacing:-.055em}
+    .lede{max-width:700px;margin:26px 0 0;color:#deebff;font-size:clamp(1rem,1.5vw,1.2rem)}
+    .date{display:block;margin-top:30px;color:#c5d7fb;font:650 .8rem/1.4 ui-monospace,monospace}
+    .specimen{align-self:center;padding:26px;border:1px solid rgba(255,255,255,.23);background:rgba(8,22,48,.28);border-radius:18px}
+    .specimen p{margin:0 0 16px;color:#c7d8f7;font:700 .7rem/1.3 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
+    .row{display:grid;grid-template-columns:38px 1fr auto;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.13);font-size:.78rem}
+    .row:first-of-type{border-top:0}.bad{color:#ff9aaa}.good{color:#62e1c8}
+    .metrics{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);width:calc(100% - 56px);margin:-18px auto 58px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--line);gap:1px;box-shadow:0 8px 30px rgba(25,49,87,.08)}
+    .metric{padding:21px;background:#fff}.metric strong{display:block;color:var(--blue);font:500 2rem/1 Georgia,serif}.metric span{display:block;margin-top:7px;color:var(--muted);font:700 .66rem/1.3 ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase}
+    .layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:46px;align-items:start}
+    nav{position:sticky;top:18px;padding:20px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.92)}
+    nav p{margin:0 0 10px;color:var(--muted);font:750 .67rem/1.3 ui-monospace,monospace;letter-spacing:.11em;text-transform:uppercase}
+    nav ol{margin:0;padding-left:1.15rem;color:#9aa7ba}nav li{padding:4px 0 4px 5px}nav a{color:var(--ink);font-size:.82rem;text-decoration:none}nav a:hover{color:var(--blue)}
+    main{min-width:0}section{margin-bottom:70px;scroll-margin-top:20px}
+    .section-head{display:grid;grid-template-columns:70px 1fr;gap:18px;padding-bottom:17px;margin-bottom:25px;border-bottom:1px solid var(--line)}
+    .section-no{color:var(--violet);font:750 .76rem/1.2 ui-monospace,monospace;letter-spacing:.12em}
+    h2{margin:0;font-size:clamp(2rem,4vw,3.6rem);font-weight:400;letter-spacing:-.035em}
+    h3{margin:0 0 10px;font-size:1.35rem}p{margin:0 0 16px}
+    .callout{padding:22px 24px;border-left:5px solid var(--blue);border-radius:0 14px 14px 0;background:#edf3ff}
+    .callout.red{border-color:var(--red);background:var(--red-soft)}.callout.green{border-color:var(--green);background:var(--green-soft)}.callout.amber{border-color:var(--amber);background:var(--amber-soft)}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card{padding:22px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:0 7px 24px rgba(25,49,87,.055)}
+    .card p:last-child{margin-bottom:0}.label{display:block;margin-bottom:9px;color:var(--violet);font:750 .66rem/1.2 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+    pre{overflow:auto;margin:15px 0 22px;padding:20px;color:var(--code-ink);background:var(--code);border-radius:14px;font:500 .78rem/1.62 ui-monospace,monospace;tab-size:2}
+    pre .dim{color:#95a8c8}pre .ok{color:#67dfc6}pre .err{color:#ff91a2}
+    table{width:100%;border-collapse:collapse;margin:18px 0 24px;background:#fff;border:1px solid var(--line);font-size:.88rem}
+    th,td{padding:13px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+    th{color:#fff;background:var(--navy);font:750 .69rem/1.3 ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase}
+    tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#f8faff}
+    .timeline{border-left:2px solid var(--line);margin-left:10px;padding-left:28px}.event{position:relative;margin-bottom:28px}.event:before{content:"";position:absolute;left:-36px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 5px var(--paper)}.event.red:before{background:var(--red)}.event.green:before{background:var(--green)}
+    details{margin:12px 0;border:1px solid var(--line);border-radius:12px;background:#fff}summary{cursor:pointer;padding:15px 18px;font-weight:750}details>div{padding:0 18px 18px}
+    .question{display:grid;grid-template-columns:32px 1fr;gap:12px;margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:#fff}.qmark{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;color:#fff;background:var(--violet);font-weight:800}.question strong{display:block;margin-bottom:5px}
+    .resume{padding:28px;color:#fff;background:linear-gradient(135deg,var(--navy),#29447b);border-radius:20px}.resume code{color:#bfe5ff}
+    footer{display:flex;justify-content:space-between;gap:20px;margin-top:70px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.78rem}
+    @media(max-width:850px){.hero{grid-template-columns:1fr}.specimen{display:none}.metrics{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}nav{position:static}.grid-2{grid-template-columns:1fr}}
+    @media(max-width:560px){.page{width:min(calc(100% - 20px),var(--max));margin-top:10px}.hero{min-height:480px;padding:30px 24px;border-radius:20px}.metrics{width:calc(100% - 20px)}.metric{padding:17px 14px}.section-head{grid-template-columns:1fr;gap:7px}th,td{padding:10px 9px;font-size:.78rem}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    @media print{@page{margin:13mm}body{background:#fff}.page{width:100%;margin:0}.hero{min-height:0;border-radius:0;box-shadow:none}.specimen,nav{display:none}.hero{grid-template-columns:1fr}.metrics{width:100%;margin:12px 0 35px}.layout{display:block}section{break-inside:auto}.card,.callout,details,pre,table{break-inside:avoid;box-shadow:none}details>div{display:block!important}a{color:inherit;text-decoration:none}footer{break-before:avoid}}
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">TokMesh Lite · Session 02 · Field workbook</p>
+      <h1>A contract meets real rows.</h1>
+      <p class="lede">We turned an abstract Rust validator into a runnable synthetic Nigeria lithium learning product, broke its inputs deliberately, and learned to read every failure as evidence.</p>
+      <span class="date">22 August 2026 · checkpoint <strong>2e00acd</strong></span>
+    </div>
+    <aside class="specimen" aria-label="Invalid fixture specimen">
+      <p>invalid.csv · controlled specimen</p>
+      <div class="row"><span>03</span><span>duplicate site_id</span><strong class="bad">REJECT</strong></div>
+      <div class="row"><span>04</span><span>unknown jurisdiction</span><strong class="bad">REJECT</strong></div>
+      <div class="row"><span>05</span><span>grade 12.50</span><strong class="bad">REJECT</strong></div>
+      <div class="row"><span>06</span><span>empty site_name</span><strong class="bad">REJECT</strong></div>
+      <div class="row"><span>07</span><span>date cycle</span><strong class="good">NEXT</strong></div>
+    </aside>
+  </header>
+
+  <div class="metrics" aria-label="Session snapshot">
+    <div class="metric"><strong>12</strong><span>contract columns</span></div>
+    <div class="metric"><strong>11</strong><span>tests passing</span></div>
+    <div class="metric"><strong>4</strong><span>deliberate defects</span></div>
+    <div class="metric"><strong>2</strong><span>prior checkpoints</span></div>
+  </div>
+
+  <div class="layout">
+    <nav aria-label="Workbook contents">
+      <p>Workbook contents</p>
+      <ol>
+        <li><a href="#orientation">Orientation</a></li>
+        <li><a href="#product">The product</a></li>
+        <li><a href="#failures">Failure laboratory</a></li>
+        <li><a href="#tdd">TDD cycles</a></li>
+        <li><a href="#rust">Rust anatomy</a></li>
+        <li><a href="#commands">Command atlas</a></li>
+        <li><a href="#git">Git checkpoint</a></li>
+        <li><a href="#pages">HTML and Pages</a></li>
+        <li><a href="#questions">Questions answered</a></li>
+        <li><a href="#evidence">Final evidence</a></li>
+        <li><a href="#resume">Resume here</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="orientation">
+        <div class="section-head"><span class="section-no">01 / ORIENT</span><h2>What this session accomplished</h2></div>
+        <p>TokMesh Lite already knew how to parse a YAML manifest and validate CSV data. This session gave that engine a concrete, runnable learning product. All records are explicitly synthetic: they are test data, not claims about real mines, operators, reserves, grades, or production.</p>
+        <div class="grid-2">
+          <article class="card"><span class="label">Data-product outcome</span><h3>A portable contract</h3><p>One manifest describes ownership, a 12-column schema, sovereignty metadata, and executable quality expectations. Two small CSV files demonstrate success and failure without infrastructure or containers.</p></article>
+          <article class="card"><span class="label">Learning outcome</span><h3>Failures became instruments</h3><p>Missing files, malformed YAML, broken CSV records, and semantically invalid values showed us different failure boundaries and exit codes. We repaired one layer at a time.</p></article>
+        </div>
+        <div class="callout amber"><strong>Accuracy boundary.</strong> Jurisdiction names and lithium vocabulary provide a Nigeria-focused learning context. The individual site identifiers, names, coordinates, grades, dates, and activities are synthetic.</div>
+      </section>
+
+      <section id="product">
+        <div class="section-head"><span class="section-no">02 / PRODUCT</span><h2>The three-file learning product</h2></div>
+        <pre>examples/nigeria-lithium/
+├── product.yaml   <span class="dim"># contract: schema + quality + ownership</span>
+├── valid.csv      <span class="dim"># eight rows expected to pass</span>
+└── invalid.csv    <span class="dim"># eight rows with controlled defects</span></pre>
+        <table>
+          <thead><tr><th>Contract area</th><th>Declared behavior</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td>Identity</td><td><code>id</code>, name, semantic version, description</td><td>Lets people and automation identify the product and its release.</td></tr>
+            <tr><td>Ownership</td><td>Nigeria · TokMesh Learning Laboratory</td><td>A data product has an accountable owner, not merely a file location.</td></tr>
+            <tr><td>Schema</td><td>12 required columns</td><td>Defines the expected shape and primitive value types.</td></tr>
+            <tr><td>Quality</td><td>Unique IDs, accepted categories, numeric ranges</td><td>Turns expectations into executable checks.</td></tr>
+            <tr><td>Sovereignty</td><td><code>national</code>, allowed country Nigeria</td><td>Introduces policy metadata without pretending the CLI enforces a full governance platform.</td></tr>
+            <tr><td>License</td><td><code>CC0-1.0</code></td><td>Makes the synthetic example easy to reuse.</td></tr>
+          </tbody>
+        </table>
+        <details open><summary>The 12 columns</summary><div><p><code>site_id</code>, <code>site_name</code>, <code>jurisdiction</code>, <code>district_code</code>, <code>zone</code>, <code>deposit_type</code>, <code>primary_mineral</code>, <code>li2o_grade_percent</code>, <code>activity</code>, <code>latitude</code>, <code>longitude</code>, and <code>sample_date</code>.</p></div></details>
+      </section>
+
+      <section id="failures">
+        <div class="section-head"><span class="section-no">03 / LAB</span><h2>Failure laboratory: what broke and why</h2></div>
+        <div class="timeline">
+          <article class="event red"><h3>1. The fixture did not exist</h3><p>The CLI process ran, but it could not read <code>product.yaml</code>. That is an execution/input problem, so the command returned exit code <code>2</code>, not validation exit code <code>1</code>.</p><pre><span class="err">error: could not read .../examples/nigeria-lithium/product.yaml:
+No such file or directory (os error 2)</span></pre></article>
+          <article class="event red"><h3>2. YAML indentation was invalid</h3><p>After the file existed, parsing reached line 2 and stopped. YAML uses indentation as structure, so a misplaced mapping key changes—or destroys—the document.</p><pre><span class="err">mapping values are not allowed in this context at line 2 column 7</span></pre></article>
+          <article class="event red"><h3>3. CSV records were physically split</h3><p>The header had 9 fields in the early draft while subsequent physical lines had 4, 6, or 7. A CSV reader expects a consistent record width unless multiline fields are correctly quoted.</p><pre>awk -F',' '{print "line", NR, "has", NF, "fields"}' \
+  examples/nigeria-lithium/valid.csv
+
+<span class="err">line 1 has 9 fields
+line 2 has 4 fields
+line 3 has 6 fields</span></pre></article>
+          <article class="event green"><h3>4. Repair restored 12 fields per line</h3><p>A backup was made first. Wrapped fragments and leading indentation were repaired, then <code>awk</code> confirmed that all nine physical lines—one header plus eight records—contained exactly 12 fields.</p><pre><span class="ok">line 1 has 12 fields
+...
+line 9 has 12 fields</span></pre></article>
+          <article class="event red"><h3>5. “Invalid” data was still valid</h3><p>Copying <code>valid.csv</code> created a structurally useful starting point, but it contained no broken promise. The validator correctly returned <code>0</code>. We then introduced controlled defects one at a time.</p></article>
+        </div>
+        <div class="callout"><strong>Core lesson:</strong> a file can exist but fail to parse; parse successfully but have broken record structure; or be structurally valid while violating the product contract. Each layer needs a precise test and a distinct explanation.</div>
+      </section>
+
+      <section id="tdd">
+        <div class="section-head"><span class="section-no">04 / TDD</span><h2>Four controlled defects, observable through public behavior</h2></div>
+        <p>We used two already agreed public seams: the CLI process boundary for exit behavior and <code>validate_data</code> for detailed issue reports. We did not test private helper functions.</p>
+        <table>
+          <thead><tr><th>CSV location</th><th>Deliberate value</th><th>Expected issue</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><code>row[3].site_id</code></td><td><code>NG-LI-000001</code> repeated</td><td><code>quality.unique.duplicate</code></td><td>GREEN</td></tr>
+            <tr><td><code>row[4].jurisdiction</code></td><td><code>Unknown</code></td><td><code>quality.accepted_values.rejected</code></td><td>GREEN</td></tr>
+            <tr><td><code>row[5].li2o_grade_percent</code></td><td><code>12.50</code></td><td><code>quality.range.outside</code></td><td>GREEN</td></tr>
+            <tr><td><code>row[6].site_name</code></td><td>empty field</td><td><code>data.value.required</code></td><td>GREEN</td></tr>
+            <tr><td><code>row[7].sample_date</code></td><td>still valid: <code>2026-01-20</code></td><td><code>data.value.type</code></td><td>NEXT RED</td></tr>
+          </tbody>
+        </table>
+        <h3>Report-level test pattern</h3>
+        <pre>#[test]
+fn nigeria_lithium_invalid_example_rejects_missing_site_name() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let manifest_path = root.join("examples/nigeria-lithium/product.yaml");
+    let data_path = root.join("examples/nigeria-lithium/invalid.csv");
+
+    let manifest = load_manifest(&amp;manifest_path).expect("manifest should parse");
+    let report = validate_data(&amp;manifest, &amp;data_path)
+        .expect("CSV should be readable");
+
+    assert!(report.issues.iter().any(|issue| {
+        issue.code == "data.value.required"
+            &amp;&amp; issue.location == "row[6].site_name"
+    }));
+}</pre>
+        <h3>CLI process test pattern</h3>
+        <pre>let status = Command::new(env!("CARGO_BIN_EXE_tokmesh-lite"))
+    .args([
+        "data",
+        "validate",
+        &amp;format!("{root}/examples/nigeria-lithium/product.yaml"),
+        &amp;format!("{root}/examples/nigeria-lithium/invalid.csv"),
+    ])
+    .status()
+    .expect("CLI should run");
+
+assert_eq!(status.code(), Some(1));</pre>
+        <div class="callout green"><strong>Why these tests are worth keeping.</strong> They describe caller-visible promises: which command succeeds, which exit code represents invalid data, and which stable issue code identifies each broken contract expectation.</div>
+      </section>
+
+      <section id="rust">
+        <div class="section-head"><span class="section-no">05 / RUST</span><h2>Rust constructs encountered</h2></div>
+        <div class="grid-2">
+          <article class="card"><span class="label">Compile-time environment</span><h3><code>env!(...)</code></h3><p>The macro reads a Cargo-provided value while compiling. <code>CARGO_MANIFEST_DIR</code> gives tests a stable repository root instead of relying on the terminal’s current directory.</p></article>
+          <article class="card"><span class="label">Paths</span><h3><code>Path::new</code> and <code>.join</code></h3><p>They build filesystem paths using platform-aware path handling. Joining path components is clearer and safer than hand-building separators.</p></article>
+          <article class="card"><span class="label">Result handling</span><h3><code>.expect(...)</code></h3><p>Unwraps a successful <code>Result</code>. If setup fails, the test stops with the supplied explanation, making fixture problems readable.</p></article>
+          <article class="card"><span class="label">Iterator predicate</span><h3><code>.iter().any(...)</code></h3><p>Borrows each issue and returns true as soon as one issue satisfies the closure. It does not consume the report.</p></article>
+          <article class="card"><span class="label">Closure</span><h3><code>|issue| { ... }</code></h3><p>An inline function receiving one issue. The body defines exactly what matching evidence means.</p></article>
+          <article class="card"><span class="label">Assertions</span><h3><code>assert!</code> and <code>assert_eq!</code></h3><p><code>assert!</code> expects a Boolean condition. <code>assert_eq!</code> compares two values and prints both sides when they differ.</p></article>
+          <article class="card"><span class="label">Logical conjunction</span><h3><code>&amp;&amp;</code></h3><p>Both the stable issue code and exact location must match. This prevents a test from passing because an unrelated problem happened elsewhere.</p></article>
+          <article class="card"><span class="label">Process integration</span><h3><code>Command::new</code></h3><p>Starts the compiled CLI as a user would, providing confidence in arguments, printed behavior, and operating-system exit status.</p></article>
+        </div>
+      </section>
+
+      <section id="commands">
+        <div class="section-head"><span class="section-no">06 / COMMANDS</span><h2>Command atlas: what every part means</h2></div>
+        <table>
+          <thead><tr><th>Command or token</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>cargo run -- product validate FILE</code></td><td>Builds if necessary, runs the binary, and passes everything after <code>--</code> to TokMesh Lite.</td></tr>
+            <tr><td><code>cargo fmt</code></td><td>Rewrites Rust source into standard Rust formatting.</td></tr>
+            <tr><td><code>cargo fmt --check</code></td><td>Checks formatting without changing files; useful before a commit or in CI.</td></tr>
+            <tr><td><code>cargo test</code></td><td>Runs unit tests, integration tests, and documentation tests.</td></tr>
+            <tr><td><code>cargo test --test validation</code></td><td>Selects the integration-test binary built from <code>tests/validation.rs</code>.</td></tr>
+            <tr><td><code>NAME -- --exact</code></td><td>Selects a test name; the separator passes <code>--exact</code> to Rust’s test harness so partial names do not match.</td></tr>
+            <tr><td><code>cargo clippy</code></td><td>Runs Rust’s linter for likely mistakes and non-idiomatic code.</td></tr>
+            <tr><td><code>--all-targets</code></td><td>Checks library, binary, tests, examples, and other Cargo targets.</td></tr>
+            <tr><td><code>--all-features</code></td><td>Enables every declared Cargo feature while checking.</td></tr>
+            <tr><td><code>-- -D warnings</code></td><td>Passes a compiler flag after the separator; <code>-D</code> means deny, so warnings fail the command.</td></tr>
+            <tr><td><code>\</code> at line end</td><td>The shell continues the same command on the next physical line. It improves readability without creating another command.</td></tr>
+            <tr><td><code>|</code></td><td>A pipe sends standard output from the command on its left to standard input of the command on its right.</td></tr>
+            <tr><td><code>sed -i '...'</code></td><td>Runs the external Unix stream editor and modifies a file in place. Zsh or Bash parses the command; <code>sed</code> performs the edit.</td></tr>
+            <tr><td><code>sed -n '6p'</code></td><td>Suppresses automatic printing and prints only physical line 6.</td></tr>
+            <tr><td><code>cut -d',' -f1-3</code></td><td>Uses comma as delimiter and prints fields 1 through 3.</td></tr>
+            <tr><td><code>awk -F',' 'NR == 6 { ... }'</code></td><td>Uses comma as field separator, selects line 6, and can print <code>NF</code>, the number of fields.</td></tr>
+            <tr><td><code>cp SOURCE DESTINATION</code></td><td>Copies a file. We used it to preserve the pre-repair CSV in <code>/tmp</code>.</td></tr>
+          </tbody>
+        </table>
+        <h3>Why the focused test command has two separators</h3>
+        <pre>cargo test --test validation TEST_NAME -- --exact
+<span class="dim">│     │    │                 │         └─ argument for Rust test harness
+│     │    │                 └────────── separator: Cargo stops parsing here
+│     │    └──────────────────────────── integration-test target
+│     └───────────────────────────────── run tests
+└─────────────────────────────────────── Rust package manager/build tool</span></pre>
+      </section>
+
+      <section id="git">
+        <div class="section-head"><span class="section-no">07 / GIT</span><h2>Checkpointing without mystery</h2></div>
+        <pre>git status
+git add tests/cli.rs tests/validation.rs \
+  examples/nigeria-lithium/product.yaml \
+  examples/nigeria-lithium/valid.csv \
+  examples/nigeria-lithium/invalid.csv
+git diff --cached --check
+git commit -m "feat: add Nigeria lithium validation example"
+git push origin main</pre>
+        <table>
+          <thead><tr><th>Command</th><th>Repository effect</th></tr></thead>
+          <tbody>
+            <tr><td><code>git status</code></td><td>Read-only inventory of tracked, modified, staged, and untracked files.</td></tr>
+            <tr><td><code>git add FILE...</code></td><td>Copies the selected current file contents into the staging area for the next commit.</td></tr>
+            <tr><td><code>git diff --cached --stat</code></td><td>Summarizes what is staged. <code>--cached</code> means the index/staging area.</td></tr>
+            <tr><td><code>git diff --cached --check</code></td><td>Checks staged changes for whitespace errors. Silence means none were found.</td></tr>
+            <tr><td><code>git commit -m "..."</code></td><td>Creates a local, named snapshot from the staging area.</td></tr>
+            <tr><td><code>git push origin main</code></td><td>Explicitly sends local <code>main</code> commits to <code>origin/main</code>.</td></tr>
+            <tr><td><code>git push -u origin main</code></td><td>Pushes and sets the upstream tracking relationship. <code>-u</code> is short for <code>--set-upstream</code>.</td></tr>
+            <tr><td><code>git push</code></td><td>After upstream exists, pushes the current branch to its configured upstream.</td></tr>
+          </tbody>
+        </table>
+        <div class="callout green"><strong>Published checkpoint:</strong> <code>d3883f9</code> contains the Nigeria example and tests. <code>2e00acd</code> adds prominent rendered-library links to the README. Both reached <code>origin/main</code>, and the working tree was clean.</div>
+      </section>
+
+      <section id="pages">
+        <div class="section-head"><span class="section-no">08 / PAGES</span><h2>Why <code>docs/index.html</code> exists</h2></div>
+        <p>GitHub’s repository viewer is a source-code browser. Clicking an HTML file under <code>github.com/.../blob/...</code> shows its source. GitHub Pages is the static web host that renders the same committed HTML.</p>
+        <pre>main branch
+└── docs/                      <span class="dim"># configured Pages source</span>
+    ├── .nojekyll              <span class="dim"># publish static files directly</span>
+    ├── index.html             <span class="dim"># default learning-library home</span>
+    └── sessions/
+        ├── 2026-08-20-session-01.html
+        └── 2026-08-22-session-02.html</pre>
+        <p><a href="https://theafricanquant.github.io/tokmesh-lite/">Open the rendered TokMesh Lite learning library</a></p>
+        <div class="callout"><strong>Opening a separate tab:</strong> GitHub READMEs cannot reliably force <code>target="_blank"</code>. Use <kbd>Ctrl</kbd>+click on Linux/Windows, <kbd>Command</kbd>+click on macOS, middle-click, or the browser’s “Open link in new tab” menu.</div>
+      </section>
+
+      <section id="questions">
+        <div class="section-head"><span class="section-no">09 / QUESTIONS</span><h2>Your questions, preserved with their answers</h2></div>
+        <div class="question"><span class="qmark">?</span><div><strong>Shouldn’t we add and commit at every stage?</strong><p>Commit at coherent GREEN checkpoints—not while a test is intentionally RED. Several closely related fixture behaviors can form one focused commit after the complete quality gates pass.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>What is TDD?</strong><p>Test-driven development is a RED→GREEN learning loop: state one public behavior in a failing test, implement only enough to make it pass, then verify. Refactoring comes during review.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>Is <code>sed -i ...</code> a Bash command?</strong><p><code>sed</code> is an external Unix program. Bash or Zsh is the shell that parses quoting, line continuations, and pipes before launching it.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>What does <code>cargo fmt</code> do?</strong><p>It applies the standard Rust formatter. <code>cargo fmt --check</code> only checks and is ideal as a quality gate.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>What does the long Clippy command mean?</strong><p>It lints every target with every Cargo feature and turns warnings into failures, keeping the project warning-free.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>Why did the missing fixture produce exit code 2 instead of 1?</strong><p>Code 1 means the validator successfully evaluated data and found contract violations. Code 2 means it could not perform validation because input was missing, unreadable, or malformed.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>Why did the invalid CSV initially pass?</strong><p>It was copied from the valid fixture and had not yet been mutated. A filename does not make data invalid; an observable broken contract promise does.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>Why count CSV fields with <code>awk</code>?</strong><p>It exposed physical record breaks before the Rust validator could reach semantic checks. Every row now has the contract’s 12 fields.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>What does <code>-u</code> change when pushing?</strong><p>It records an upstream relationship while pushing. Once local <code>main</code> tracks <code>origin/main</code>, plain <code>git push</code> and <code>git pull</code> know the default destination/source.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>What was <code>index.html</code> for?</strong><p>It is the default entrance to the GitHub Pages learning library, linking session workbooks and durable guides in a readable website.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>Can GitHub display the HTML directly?</strong><p>The normal repository view shows source. The Pages URL renders the page. The README now links directly to that rendered address.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>Can the README force the library into a new browser tab?</strong><p>No reliable repository-controlled method exists because GitHub sanitizes such HTML behavior. Keyboard modifiers, middle-click, or the browser menu remain the dependable choices.</p></div></div>
+        <div class="question"><span class="qmark">?</span><div><strong>What is the “agreed public seam” we paused before?</strong><p>It is the caller-visible boundary where behavior is observed. For this feature, that means the public <code>validate_data</code> report and the CLI process exit code—not private parsing helpers.</p></div></div>
+      </section>
+
+      <section id="evidence">
+        <div class="section-head"><span class="section-no">10 / EVIDENCE</span><h2>The final verification run</h2></div>
+        <pre>cargo fmt --check
+<span class="ok"># passed with no output</span>
+
+cargo clippy --all-targets --all-features -- -D warnings
+<span class="ok">Finished dev profile ...</span>
+
+cargo test
+<span class="ok">tests/cli.rs:        4 passed; 0 failed
+tests/validation.rs: 7 passed; 0 failed
+doc tests:           0 failed</span>
+
+INVALID — 4 issue(s)
+- [quality.unique.duplicate] row[3].site_id
+- [quality.accepted_values.rejected] row[4].jurisdiction
+- [quality.range.outside] row[5].li2o_grade_percent
+- [data.value.required] row[6].site_name</pre>
+        <p>The suite contains 11 executable integration tests in total. The invalid CLI output demonstrates four simultaneous findings while the focused report tests prove three of them by exact code and location. Duplicate-ID behavior is also confirmed by the CLI test and output.</p>
+      </section>
+
+      <section id="resume">
+        <div class="section-head"><span class="section-no">11 / RESUME</span><h2>Resume from one precise boundary</h2></div>
+        <div class="resume">
+          <h3>First: understand and reconfirm the seam.</h3>
+          <p>The next test observes <code>validate_data</code>, because consumers care that an invalid date becomes a stable report issue at an exact row and column. They do not care which private helper discovers it.</p>
+          <p>Then add one test expecting <code>data.value.type</code> at <code>row[7].sample_date</code>. Confirm RED while row 7 still contains valid <code>2026-01-20</code>. Change only physical CSV line 7 to an unambiguously invalid month such as <code>2026-13-20</code>, then confirm GREEN.</p>
+          <p><strong>Do not conflate this fixture slice with the future date-engine feature.</strong> The current checker handles shape and broad month/day ranges. Calendar-valid parsing remains a separate roadmap item.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <span>TokMesh Lite · Session 02 field workbook</span>
+    <span>Independent · synthetic learning data · offline and print friendly</span>
+  </footer>
+</div>
+</body>
+</html>
