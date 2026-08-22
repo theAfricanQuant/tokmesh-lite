@@ -2,6 +2,15 @@
 
 TokMesh Lite is a small Rust command-line application for validating a data-product manifest and its CSV dataset. It is the first standalone TokMesh learning repository.
 
+## Read the learning library
+
+[Open the rendered TokMesh Lite HTML learning library](https://theafricanquant.github.io/tokmesh-lite/)
+
+The learning library contains the session workbooks, commands, test outputs,
+Rust explanations, and project milestones. To open it in a separate browser
+tab, use Ctrl+click on Linux or Windows, Command+click on macOS, or
+middle-click the link.
+
 ## What you can do
 
 ```bash
@@ -44,10 +53,10 @@ The first two validations pass. The deliberately invalid manifest fails and expl
 
 ## Concepts
 
-- [Learning library on GitHub Pages](https://theafricanquant.github.io/tokmesh-lite/)
+- [Rendered HTML learning library](https://theafricanquant.github.io/tokmesh-lite/)
+- [Session 1 rendered HTML workbook](https://theafricanquant.github.io/tokmesh-lite/sessions/2026-08-20-session-01.html)
 - [Rust and data-mesh learning roadmap](docs/learning.md)
 - [Learning progress](docs/progress.md)
-- [Session 1 HTML workbook](docs/sessions/2026-08-20-session-01.html)
 - [Data-mesh concepts](docs/data-mesh.md)
 - [Architecture decisions](docs/decisions/)
 
